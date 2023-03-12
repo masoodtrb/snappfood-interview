@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
+
 import { useGetVendorQuery } from "./vendorApi";
 import VendorCard from "./VendorCard";
 import { VendorData } from "./vendorType";
+import VirtualizedList from "features/VirtualizedList";
 
 import "./Vendor.scss";
 
-interface Props {}
-
-function Vendor(props: Props) {
+function Vendor() {
   const [page, setPage] = useState(0);
 
   const { data, isLoading, isSuccess, isFetching } = useGetVendorQuery({
@@ -33,21 +33,29 @@ function Vendor(props: Props) {
   }, [page, isFetching]);
 
   return (
-    <div className="vendor">
+    <>
       {!isLoading && isSuccess && (
-        <ul className="vendor__list">
-          {data.map(
-            (item) =>
-              item.type === "VENDOR" && (
-                <li key={(item.data as VendorData).id} className="vendor__item">
-                  <VendorCard data={item.data as VendorData} />
-                </li>
-              )
-          )}
-        </ul>
+        <VirtualizedList
+          className="vendor__list"
+          itemHeight={264}
+          windowHeight={1325}
+          numItems={data.filter((item) => item.type === "VENDOR").length}
+          renderItem={({ index, style }) => {
+            const item = data.filter((item) => item.type === "VENDOR")[index];
+            return (
+              <li
+                key={(item.data as VendorData).id}
+                className="vendor__item"
+                style={style}
+              >
+                <VendorCard data={item.data as VendorData} />
+              </li>
+            );
+          }}
+        />
       )}
       {isLoading && <p>در حال بارگزاری</p>}
-    </div>
+    </>
   );
 }
 
